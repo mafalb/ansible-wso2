@@ -1,0 +1,6 @@
+---
+
+- name: restart apigw
+  service:
+    name: wso2apigw
+    state: restarted

@@ -1,0 +1,27 @@
+---
+
+- debug: var=wso2
+
+- name: catalina-server.xml
+  template:
+    src: "{{ item }}"
+    dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/conf/tomcat/catalina-server.xml"
+    backup: yes
+    owner: root
+    group: root
+  with_first_found:
+    - catalina-server.xml.j2
+  notify:
+    - restart apigw
+
+- name: systemd unit
+  template:
+    src: wso2apigw.service.j2
+    dest: /etc/systemd/system/wso2apigw.service
+    backup: yes
+
+- name: apigw is running
+  service:
+    name: wso2apigw
+    state: started
+    enabled: yes
