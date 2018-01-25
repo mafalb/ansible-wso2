@@ -1,6 +1,8 @@
 ---
 
 - debug: var=wso2
+  tags:
+    - debug
 
 - name: catalina-server.xml
   template:
@@ -14,6 +16,17 @@
   notify:
     - restart apigw
 
+- name: axis2.xml
+  template:
+    src: "{{ item }}"
+    dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/conf/axis2/axis2.xml"
+    backup: yes
+    owner: root
+    group: root
+  with_first_found:
+    - axis2.xml.j2
+  notify:
+    - restart apigw
 - name: systemd unit
   template:
     src: wso2apigw.service.j2
