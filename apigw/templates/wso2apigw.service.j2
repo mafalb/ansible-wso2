@@ -1,12 +1,8 @@
-# For usage with systemd
-# On Ubuntu:
-# install by running sudo systemctl enable &lt;absolute path&gt;/wso2esb.service
-# start by running sudo systemctl start wso2esb.service
-# stop by running sudo systemctl stop wso2esb.service
-# check status by running systemctl status wso2esb.service
- 
+# WSO2 Api Manager 
+#
 [Unit]
 Description=WSO2 API Gateway
+
 # If network requirement is not specified, the esb can slow down shutdown
 # of the system because of timeouts towards the RDBMS running on another
 # server or other dependent remote components.
@@ -14,27 +10,33 @@ Requires=network-online.target
 After=network-online.target
   
 [Service]
+WorkingDirectory=/var/lib/apigw/wso2am-2.1.0
+
+# I am not sure if this is necessary
+#
+CARBON_HOME = {{ wso2.dir }}/wso2am-{{ wso2.version }}
+
 # The Type=simple approach is not safe: if a user starts the server using the 
 # wso2server.sh script, systemd doens't know about it and another instance will
 # be started when 'systemctl start wso2esb' is executed if the server is still running.
-  # Type=simple
-  # ExecStart=CARBON_HOME/bin/wso2server.sh
-   
+# Type=simple
+# ExecStart=CARBON_HOME/bin/wso2server.sh
+#
 Environment="JAVA_HOME=/usr/java/latest"
 Environment="CARBON_HOME={{ wso2.dir }}/wso2am-{{ wso2.version }}"
-# Can optionally be set, but the wso2server.sh script determines it automatically
-# Cannot be used within this unit file for variable substitution
-CARBON_HOME = {{ wso2.dir }}/wso2am-{{ wso2.version }}
-    
+
 Type=forking
-# Use WSO2 PID file -&gt; this allows to still use wso2server.sh start|stop commands
+
+# Use WSO2 PID file; this allows to still use wso2server.sh start|stop commands
 # directly from command line in combination with systemctl. 'Systemctl status' will
 # not detect that wso2server.sh start has been executed directly, but will correctly
 # stop the server when the system is shutdown or 'systemctl stop' is executed. Systemctl
 # will also not start another instance of the server when 'systemctl start' is executed.
 PIDFile={{ wso2.dir }}/wso2am-{{ wso2.version }}/wso2carbon.pid
+
 ExecStart={{ wso2.dir }}/wso2am-{{ wso2.version }}/bin/wso2server.sh start
 ExecStop={{ wso2.dir }}/wso2am-{{ wso2.version }}/bin/wso2server.sh stop
+
 User={{ wso2.user }}
      
 [Install]
