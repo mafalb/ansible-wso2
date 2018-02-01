@@ -2,3 +2,4 @@
 
 wso2:
   compression: "off"
+  default_keystore: yes

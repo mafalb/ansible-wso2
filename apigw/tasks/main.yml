@@ -1,8 +1,93 @@
 ---
 
+- name: is API Gateway already present?
+  stat:
+    path: "{{ wso2.dir }}/wso2am-{{ wso2.version }}"
+  register: __wso_is_installed
+  changed_when: no
+  tags:
+    - always
+
+- debug: var=__wso_is_installed
+  tags:
+    - debug
+
 - debug: var=wso2
   tags:
     - debug
+
+- name: install API Gateway
+  unarchive:
+    creates: "{{ wso2.dir }}/wso2am-{{ wso2.version }}"
+    src: files/wso2am-{{ wso2.version }}.zip
+    dest: "{{ wso2.dir }}"
+    owner: "{{ wso2.user }}"
+    group: "{{ wso2.user }}"
+  tags:
+    - install
+
+- name: remove provided keystores
+  tags:
+    - install
+  when: 
+    - __wso_is_installed.stat.exists == false
+    - wso2.default_keystore != true
+  with_items:
+    - "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
+    - "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
+  file:
+    path: "{{ item }}"
+    state: absent
+
+- name: java_keystore/selfsigned
+  tags:
+    - cfg
+  when: wso2.default_keystore != true
+  import_role:
+    name: java_keystore/selfsigned
+  vars:
+    java_keystore:
+      selfsigned:
+        wso2carbon:
+          validity: 825
+          dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
+          dn: "{{ wso2.dn }}"
+          san: dns:{{ wso2.fqdn }}
+
+- name: export the newly created certificate
+  tags:
+    - cfg
+  when: wso2.default_keystore != true
+  import_role:
+    name: java_keystore/export
+  vars:
+    java_keystore:
+      export:
+        wso2carbon:
+          keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
+          dest: /etc/pki/tls/certs/wso2carbon.cert
+
+- name: import the certificate into the truststore
+  tags:
+    - cfg
+  when: wso2.default_keystore != True
+  import_role:
+    name: java_keystore/import
+  vars:
+    java_keystore:
+      import:
+        wso2carbon:
+          keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
+          password: "{{ password }}"
+          src: /etc/pki/tls/certs/wso2carbon.cert
+        pat-pki00v-ca:
+          keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
+          password: "{{ password }}"
+          src: files/apigw/PAT-PKI00V-CA.cert
+        pat-pki01v-ca:
+          keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
+          password: "{{ password }}"
+          src: files/apigw/PAT-PKI01V-CA.cert
 
 - name: catalina-server.xml
   template:
@@ -15,6 +100,8 @@
     - catalina-server.xml.j2
   notify:
     - restart apigw
+  tags:
+    - cfg
 
 - name: axis2.xml
   template:
@@ -27,14 +114,43 @@
     - axis2.xml.j2
   notify:
     - restart apigw
+  tags:
+    - cfg
+
 - name: systemd unit
   template:
     src: wso2apigw.service.j2
     dest: /etc/systemd/system/wso2apigw.service
     backup: yes
+  tags:
+    - install
 
 - name: apigw is running
   service:
     name: wso2apigw
     state: started
     enabled: yes
+  tags:
+    - cfg
+
+- name: symlink to logfiles
+  tags:
+    - install
+  file:
+    src: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/logs"
+    dest: /var/log/wso2apigw
+    state: link
+
+- name: firewall
+  tags:
+    - install
+  firewalld:
+    port: "{{ item }}"
+    immediate: yes
+    permanent: yes
+    state: enabled
+  with_items:
+    - 9443/tcp
+    - 8280/tcp
+    - 8243/tcp
+
