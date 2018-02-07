@@ -309,10 +309,10 @@
        <parameter name="httpGetProcessor" locked="false">org.wso2.carbon.mediation.transport.handlers.PassThroughNHttpGetProcessor</parameter>
         <parameter name="keystore" locked="false">
             <KeyStore>
-                <Location>repository/resources/security/{{ wso2.jks|default('wso2carbon.jks') }}</Location>
+                <Location>repository/resources/security/{{ ansible_hostname }}.jks</Location>
                 <Type>JKS</Type>
-                <Password>{{ wso2.pass|default('wso2carbon') }}</Password>
-                <KeyPassword>{{ wso2.pass|default('wso2carbon') }}</KeyPassword>
+                <Password>{{ wso2.keystore_password }}</Password>
+                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
             </KeyStore>
         </parameter>
         <parameter name="truststore" locked="false">

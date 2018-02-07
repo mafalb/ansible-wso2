@@ -1,0 +1,106 @@
+"wso2": {
+            # these are the aliases for the trust chain
+            # put it in root-ca.cert and intermediate-ca.cert
+            "cacerts": [
+                "root-ca", 
+                "intermediate-ca"
+            ], 
+            "default_keystore": false, 
+            "dir": "/var/lib/apigw", 
+            "external_certificate": true, 
+            # better put it in a vars_file ?
+            "keystore_password": "xxx", 
+            "user": "apigw", 
+            "version": "2.1.0"
+        }, 
+
+"java": {
+            "home": "/usr/java/latest"
+        }, 
+
+
+
+---
+
+- hosts:
+    - wso2am
+  roles:
+
+    - name: rpm
+      rpm: jre1.8
+      rpm_src: files/jre-8u152-linux-x64.rpm
+      rpm_dest: /tmp/jre-8u152-linux-x64.rpm
+
+  tasks:
+
+    - name: create user {{ wso2.user }}
+      user:
+        name: "{{ wso2.user }}"
+        home: "{{ wso2.dir }}"
+
+    - name: fix ownership for user {{ wso2.user }}
+      file:
+        path: "{{ wso2.dir }}"
+        state: directory
+        owner: "{{ wso2.user }}"
+        group: "{{ wso2.user }}"
+
+    - name: set $JAVA_HOME
+      lineinfile:
+        path: "{{ wso2.dir }}/.bashrc"
+        line: export JAVA_HOME={{ java.home }}
+        regexp: export JAVA_HOME=
+        state: present
+        create: yes
+
+    - name: $PATH for wso2 user
+      lineinfile:
+        path: "{{ wso2.dir }}/.bashrc"
+        line: export PATH=${JAVA_HOME}/bin:${PATH}
+        regexp: export PATH=
+        state: present
+        create: yes
+
+    - name: .bash_profile for wso2 user
+      lineinfile:
+        path: "{{ wso2.dir }}/.bash_profile"
+        line: ". .bashrc"
+        regexp: "^. .bashrc$"
+        state: present
+        create: yes
+
+    - name: unzip is installed
+      package:
+        name: unzip
+        state: present
+
+- hosts:
+    - wso2am
+  vars_files:
+    - vars/secrets.yml
+
+  pre_tasks:
+    - name: put certificate into place
+      copy:
+        src: files/apigw/{{ ansible_hostname }}.pem
+        dest: /etc/pki/tls/certs/{{ ansible_fqdn }}.cert
+      when: wso2.external_certificate
+
+    - name: put certificate into place
+      copy:
+        src: files/apigw/{{ item }}.cert
+        dest: /etc/pki/tls/certs/{{ item }}.cert
+      with_items: "{{ wso2.cacerts }}"
+      when: wso2.external_certificate
+
+  roles:
+    - name: wso2/apigw
+      tags:
+        - wso2
+  tasks:
+    - name: keystore
+      copy:
+        src: files/apigw/{{ ansible_hostname }}/{{ ansible_hostname }}.jks
+        dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/{{ ansible_hostname }}.jks"
+      when: wso2.external_certificate
+

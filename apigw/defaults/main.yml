@@ -3,3 +3,4 @@
 wso2:
   compression: "off"
   default_keystore: yes
+  external_certificate: no
