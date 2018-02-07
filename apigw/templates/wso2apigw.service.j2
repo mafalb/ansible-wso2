@@ -10,7 +10,7 @@ Requires=network-online.target
 After=network-online.target
   
 [Service]
-WorkingDirectory=/var/lib/apigw/wso2am-2.1.0
+WorkingDirectory={{ wso2.dir }}/wso2am-{{ wso2.version }}
 
 # I am not sure if this is necessary
 #
