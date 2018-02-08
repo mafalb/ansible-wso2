@@ -104,3 +104,6 @@
         dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/{{ ansible_hostname }}.jks"
       when: wso2.external_certificate
 
+bugs:
+change of systemd unit needs a daemon-reload?
+firewall: firewalld may be disabled
