@@ -85,7 +85,7 @@
     <!-- Resolve root used to resolve synapse references like schemas inside a WSDL -->
     <parameter name="SynapseConfig.ResolveRoot" locked="false">.</parameter>
     <!-- Synapse Server name parameter -->
-    <parameter name="SynapseConfig.ServerName" locked="false">localhost</parameter>
+    <parameter name="SynapseConfig.ServerName" locked="false">{{ ansible_fqdn }}</parameter>
 
     <!-- To override repository/services you need to uncomment following parameter and value -->
     <!-- SHOULD be absolute file path. -->
@@ -336,10 +336,10 @@
         <!--parameter name="httpGetProcessor" locked="false">org.wso2.carbon.transport.nhttp.api.NHttpGetProcessor</parameter>
         <parameter name="keystore" locked="false">
             <KeyStore>
-                <Location>repository/resources/security/wso2carbon.jks</Location>
+                <Location>repository/resources/security/{{ ansible_hostname }}.jks</Location>
                 <Type>JKS</Type>
-                <Password>wso2carbon</Password>
-                <KeyPassword>wso2carbon</KeyPassword>
+                <Password>{{ wso2.keystore_password }}</Password>
+                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
             </KeyStore>
         </parameter>
         <parameter name="truststore" locked="false">
@@ -369,10 +369,10 @@
         <!--parameter name="WSDLEPRPrefix" locked="false">https://apachehost:port/somepath</parameter-->
         <!--<parameter name="keystore" locked="false">
             <KeyStore>
-                <Location>repository/resources/security/wso2carbon.jks</Location>
+                <Location>repository/resources/security/{{ ansible_hostname }}.jks</Location>
                 <Type>JKS</Type>
-                <Password>wso2carbon</Password>
-                <KeyPassword>wso2carbon</KeyPassword>
+                <Password>{{ wso2.keystore_password }}</Password>
+                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
             </KeyStore>
         </parameter>
         <parameter name="truststore" locked="false">
@@ -496,10 +496,10 @@
         <parameter name="non-blocking" locked="false">true</parameter>
         <parameter name="keystore" locked="false">
             <KeyStore>
-                <Location>repository/resources/security/wso2carbon.jks</Location>
+                <Location>repository/resources/security/{{ ansible_hostname }}.jks</Location>
                 <Type>JKS</Type>
-                <Password>wso2carbon</Password>
-                <KeyPassword>wso2carbon</KeyPassword>
+                <Password>{{ wso2.keystore_password }}</Password>
+                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
             </KeyStore>
         </parameter>
         <parameter name="truststore" locked="false">
@@ -530,10 +530,10 @@
         <parameter name="non-blocking" locked="false">true</parameter>
         <parameter name="keystore" locked="false">
             <KeyStore>
-                <Location>repository/resources/security/wso2carbon.jks</Location>
+                <Location>repository/resources/security/{{ ansible_hostname }}.jks</Location>
                 <Type>JKS</Type>
-                <Password>wso2carbon</Password>
-                <KeyPassword>wso2carbon</KeyPassword>
+                <Password>{{ wso2.keystore_password }}</Password>
+                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
             </KeyStore>
         </parameter>
         <parameter name="truststore" locked="false">
@@ -551,10 +551,10 @@
         <parameter name="non-blocking" locked="false">true</parameter>
         <parameter name="keystore" locked="false">
             <KeyStore>
-                <Location>repository/resources/security/wso2carbon.jks</Location>
+                <Location>repository/resources/security/{{ ansible_hostname }}.jks</Location>
                 <Type>JKS</Type>
-                <Password>wso2carbon</Password>
-                <KeyPassword>wso2carbon</KeyPassword>
+                <Password>{{ wso2.keystore_password }}</Password>
+                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
             </KeyStore>
         </parameter>
         <parameter name="truststore" locked="false">

@@ -26,60 +26,8 @@
   tags:
     - install
 
-- name: remove provided keystores
-  tags:
-    - install
-  when: 
-    - __wso_is_installed.stat.exists == false
-    - wso2.default_keystore != true
-  with_items:
-    - "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
-    - "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
-  file:
-    path: "{{ item }}"
-    state: absent
-
 - name: java_keystore/selfsigned
-  tags:
-    - cfg
-  when: wso2.default_keystore != true
-  import_role:
-    name: java_keystore/selfsigned
-  vars:
-    data:
-      alias: wso2carbon
-      dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
-      dn: CN=localhost
-      san: dns:localhost,ip:127.0.0.1
-      password: wso2carbon
-
-- name: export the newly created self signed certificate
-  tags:
-    - cfg
-  when: wso2.default_keystore != true
-  import_role:
-    name: java_keystore/export
-  vars:
-    data:
-      alias: wso2carbon
-      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
-      dest: /etc/pki/tls/certs/wso2carbon.cert
-      password: wso2carbon
-
-- name: import the certificate into the truststore
-  tags:
-    - cfg
-  when: wso2.default_keystore != True
-  import_role:
-    name: java_keystore/import
-  vars:
-    data:
-      alias: wso2carbon
-      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
-      password: wso2carbon
-      src: /etc/pki/tls/certs/wso2carbon.cert
- 
-- name: java_keystore/selfsigned
+  when: wso2.external_keystore == false
   tags:
     - cfg
   import_role:
@@ -95,20 +43,19 @@
 - name: export the newly created self signed certificate
   tags:
     - cfg
-  when: wso2.default_keystore != true
+  when: wso2.external_keystore == false
   import_role:
     name: java_keystore/export
   vars:
     data:
       alias: "{{ ansible_hostname }}"
       keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/{{ ansible_hostname }}.jks"
-      dest: /etc/pki/tls/certs/{{ ansible_fqdn }}.cert
+      dest: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
       password: "{{ wso2.keystore_password }}"
 
 - name: import the certificate into the truststore
   tags:
     - cfg
-  when: wso2.default_keystore != True
   import_role:
     name: java_keystore/import
   vars:
@@ -116,7 +63,32 @@
       alias: "{{ ansible_hostname }}"
       keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
       password: wso2carbon
-      src: /etc/pki/tls/certs/{{ ansible_fqdn }}.cert
+      src: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
+
+- name: copy keystore
+  when: wso2.external_keystore != false
+  copy:
+    src: "{{ playbook_dir }}/{{ wso2.external_keystore }}"
+    dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/{{ ansible_hostname }}.jks"
+    owner: "{{ wso2.user }}"
+    group: "{{ wso2.user }}"
+
+- name: copy certificate
+  when: wso2.external_certificate != false
+  copy:
+    src: "{{ playbook_dir }}/{{ wso2.external_certificate }}"
+    dest: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
+
+- name: export certificate
+  when: wso2.external_certificate == false
+  import_role:
+    name: java_keystore/export
+  vars:
+    data:
+      alias: "{{ ansible_hostname }}"
+      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/{{ ansible_hostname }}.jks"
+      dest: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
+      password: "{{ wso2.keystore_password }}"
 
 - name: import CA certificates into the truststore
   tags:
@@ -130,9 +102,10 @@
       password: wso2carbon
       src: /etc/pki/tls/certs/{{ item }}.cert
   with_items: "{{ wso2.cacerts }}"
-  when: wso2.external_certificate
+  when:
+    - wso2.external_ca != false
 
-- name: import signed certificate into the truststore
+- name: import external certificate into the truststore
   tags:
     - cfg
   import_role:
@@ -143,15 +116,15 @@
       keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
       password: wso2carbon
       src: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
-  when: wso2.external_certificate
+  when: wso2.external_certificate != false
 
 - name: catalina-server.xml
   template:
     src: "{{ item }}"
     dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/conf/tomcat/catalina-server.xml"
     backup: yes
-    owner: root
-    group: root
+    owner: "{{ wso2.user }}"
+    group: "{{ wso2.user }}"
   with_first_found:
     - catalina-server.xml.j2
   notify:
@@ -164,8 +137,8 @@
     src: "{{ item }}"
     dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/conf/axis2/axis2.xml"
     backup: yes
-    owner: root
-    group: root
+    owner: "{{ wso2.user }}"
+    group: "{{ wso2.user }}"
   with_first_found:
     - axis2.xml.j2
   notify:
@@ -178,23 +151,22 @@
     src: "{{ item }}"
     dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/conf/api-manager.xml"
     backup: yes
-    owner: root
-    group: root
+    owner: "{{ wso2.user }}"
+    group: "{{ wso2.user }}"
   with_first_found:
     - api-manager.xml.j2
   notify:
     - restart apigw
   tags:
     - cfg
-  when: no
 
 - name: carbon.xml
   template:
     src: "{{ item }}"
     dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/conf/carbon.xml"
     backup: yes
-    owner: root
-    group: root
+    owner: "{{ wso2.user }}"
+    group: "{{ wso2.user }}"
   with_first_found:
     - carbon.xml.j2
   notify:

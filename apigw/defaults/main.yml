@@ -2,5 +2,10 @@
 
 wso2:
   compression: "off"
+
+  # not used
   default_keystore: yes
+
   external_certificate: no
+  external_keystore: no
+  external_ca: no
