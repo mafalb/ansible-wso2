@@ -1,7 +1,6 @@
 ---
 
-- name: is API Gateway already present?
-  stat:
+- stat:
     path: "{{ wso2.dir }}/wso2am-{{ wso2.version }}"
   register: __wso_is_installed
   changed_when: no
