@@ -1,24 +1,33 @@
-"wso2": {
-            # these are the aliases for the trust chain
-            # put it in root-ca.cert and intermediate-ca.cert
-            "cacerts": [
-                "root-ca", 
-                "intermediate-ca"
-            ], 
-            "default_keystore": false, 
-            "dir": "/var/lib/apigw", 
-            "external_certificate": true, 
-            # better put it in a vars_file ?
-            "keystore_password": "xxx", 
-            "user": "apigw", 
-            "version": "2.1.0"
-        }, 
+wso2:
+  user: apigw
+  version: '2.1.0'
+  dir: /var/lib/apigw
+  default_keystore: no
 
-"java": {
-            "home": "/usr/java/latest"
-        }, 
+  keystore_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          blabla...
 
+  # if we provide an existing certificate
+  #
+  external_certificate: yes
 
+  # if we have to use external CA certificates
+  # see also cacerts
+  #
+  external_ca: yes
+
+  # these are the aliases for the trust chain
+  # these are only relevant when external_certificate is true
+  #
+  cacerts:
+    - alias: ROOT-CA
+      file: files/apigw/PAT-PKI00V-CA.cert
+    - alias: INTERMEDIATE-CA
+      file: files/apigw/PAT-PKI01V-CA.cert
+            
+java:
+  home: /usr/java/latest
 
 ---
 

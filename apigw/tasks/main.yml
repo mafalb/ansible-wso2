@@ -80,6 +80,13 @@
     src: "{{ playbook_dir }}/{{ wso2.external_certificate_file }}"
     dest: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
 
+- name: copy CA certificates
+  when: wso2.external_ca == true
+  copy:
+    src: "{{ playbook_dir }}/{{ item.file }}"
+    dest: /etc/pki/tls/certs/{{ item.alias }}.cert
+  with_items: "{{ wso2.cacerts }}"
+
 - name: export certificate
   when: wso2.external_certificate == false
   import_role:
@@ -98,7 +105,7 @@
     name: java_keystore/import
   vars:
     data:
-      alias: "{{ item }}"
+      alias: "{{ item.alias }}"
       keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
       password: wso2carbon
       src: /etc/pki/tls/certs/{{ item }}.cert
