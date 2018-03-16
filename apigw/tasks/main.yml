@@ -1,5 +1,7 @@
 ---
 
+- debug: var=wso2
+
 - stat:
     path: "{{ wso2.dir }}/wso2am-{{ wso2.version }}"
   register: __wso_is_installed
@@ -70,10 +72,18 @@
   when: wso2.external_keystore != false
   copy:
     src: "{{ playbook_dir }}/{{ wso2.external_keystore_file }}"
-    dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/{{ ansible_hostname }}.jks"
+    dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
     owner: "{{ wso2.user }}"
     group: "{{ wso2.user }}"
 
+- name: copy truststore
+  when: wso2.external_truststore != false
+  copy:
+    src: "{{ playbook_dir }}/{{ wso2.external_truststore_file }}"
+    dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
+    owner: "{{ wso2.user }}"
+    group: "{{ wso2.user }}"
+  
 - name: copy certificate
   when: wso2.external_certificate != false
   copy:
@@ -94,7 +104,7 @@
   vars:
     data:
       alias: "{{ ansible_hostname }}"
-      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/{{ ansible_hostname }}.jks"
+      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
       dest: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
       password: "{{ wso2.keystore_password }}"
 
@@ -189,6 +199,27 @@
     group: "{{ wso2.user }}"
   with_first_found:
     - carbon.xml.j2
+  notify:
+    - restart apigw
+  tags:
+    - cfg
+
+- name: create directories
+  file:
+    path: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/deployment/server"
+    recurse: true
+    state: directory
+    owner: "{{ wso2.user }}"
+    group: "{{ wso2.user }}"
+
+- debug: msg="{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/deployment/server/senderprofiles.xml"
+- name: senderprofiles.xml
+  template:
+    src: senderprofiles.xml.j2
+    dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/deployment/server/senderprofiles.xml"
+    backup: yes
+    owner: "{{ wso2.user }}"
+    group: "{{ wso2.user }}"
   notify:
     - restart apigw
   tags:
