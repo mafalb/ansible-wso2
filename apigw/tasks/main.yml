@@ -43,6 +43,7 @@
     dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
     owner: "{{ wso2.user }}"
     group: "{{ wso2.user }}"
+    backup: true
 
 - name: copy truststore
   copy:
@@ -50,6 +51,7 @@
     dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
     owner: "{{ wso2.user }}"
     group: "{{ wso2.user }}"
+    backup: true
   
 - name: user-mgt.xml
   template:

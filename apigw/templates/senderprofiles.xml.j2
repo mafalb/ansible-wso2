@@ -1,17 +1,17 @@
 <parameter name="customSSLProfiles">
 <profile>
-     <servers>pat-sit.s-versicherung.co.at:443</servers>
+     <servers>{{ wso2.mutual_ssl_host }}</servers>
      <TrustStore>
         <Location>repository/resources/security/client-truststore.jks</Location>
         <Type>JKS</Type>
-        <Password>wso2.keystore_password</Password>
+        <Password>{{ wso2.keystore_password }}</Password>
      </TrustStore>
  
      <KeyStore>
          <Location>repository/resources/security/wso2carbon.jks</Location>
          <Type>JKS</Type>
          <Password>wso2.keystore_password</Password>
-         <KeyPassword>wso2.keystore_password</KeyPassword>
+         <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
      </KeyStore>
 
 </profile>
