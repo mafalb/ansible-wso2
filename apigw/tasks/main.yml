@@ -1,6 +1,9 @@
 ---
 
 - debug: var=wso2
+  tags:
+    - debug
+    - never
 
 - stat:
     path: "{{ wso2.dir }}/wso2am-{{ wso2.version }}"
@@ -12,10 +15,12 @@
 - debug: var=__wso_is_installed
   tags:
     - debug
+    - never
 
 - debug: var=wso2
   tags:
     - debug
+    - never
 
 - name: install API Gateway
   unarchive:
@@ -27,49 +32,12 @@
   tags:
     - install
 
-- name: java_keystore/selfsigned
-  when: wso2.external_keystore == false
-  tags:
-    - cfg
-  import_role:
-    name: java_keystore/selfsigned
-  vars:
-    data:
-      alias: "{{ ansible_hostname }}"
-      dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/{{ ansible_hostname }}.jks"
-      dn: CN={{ ansible_fqdn }}
-      san: dns:{{ ansible_fqdn }}
-      password: "{{ wso2.keystore_password }}"
-
-- name: export the newly created self signed certificate
-  tags:
-    - cfg
-  when: wso2.external_keystore == false
-  import_role:
-    name: java_keystore/export
-  vars:
-    data:
-      alias: "{{ ansible_hostname }}"
-      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/{{ ansible_hostname }}.jks"
-      dest: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
-      password: "{{ wso2.keystore_password }}"
-
-- name: import the certificate into the truststore
-  tags:
-    - cfg
-  import_role:
-    name: java_keystore/import
-  vars:
-    data:
-      alias: "{{ ansible_hostname }}"
-      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
-      password: wso2carbon
-      src: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
-
 - debug: var=wso2.external_keystore
+  tags:
+    - debug
+    - never
 
 - name: copy keystore
-  when: wso2.external_keystore != false
   copy:
     src: "{{ playbook_dir }}/{{ wso2.external_keystore_file }}"
     dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
@@ -77,65 +45,12 @@
     group: "{{ wso2.user }}"
 
 - name: copy truststore
-  when: wso2.external_truststore != false
   copy:
     src: "{{ playbook_dir }}/{{ wso2.external_truststore_file }}"
     dest: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
     owner: "{{ wso2.user }}"
     group: "{{ wso2.user }}"
   
-- name: copy certificate
-  when: wso2.external_certificate != false
-  copy:
-    src: "{{ playbook_dir }}/{{ wso2.external_certificate_file }}"
-    dest: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
-
-- name: copy CA certificates
-  when: wso2.external_ca == true
-  copy:
-    src: "{{ playbook_dir }}/{{ item.file }}"
-    dest: /etc/pki/tls/certs/{{ item.alias }}.cert
-  with_items: "{{ wso2.cacerts }}"
-
-- name: export certificate
-  when: wso2.external_certificate == false
-  import_role:
-    name: java_keystore/export
-  vars:
-    data:
-      alias: "{{ ansible_hostname }}"
-      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/wso2carbon.jks"
-      dest: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
-      password: "{{ wso2.keystore_password }}"
-
-- name: import CA certificates into the truststore
-  tags:
-    - cfg
-  include_role:
-    name: java_keystore/import
-  vars:
-    data:
-      alias: "{{ item.alias }}"
-      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
-      password: wso2carbon
-      src: /etc/pki/tls/certs/{{ item }}.cert
-  with_items: "{{ wso2.cacerts }}"
-  when:
-    - wso2.external_ca != false
-
-- name: import external certificate into the truststore
-  tags:
-    - cfg
-  import_role:
-    name: java_keystore/import
-  vars:
-    data:
-      alias: "{{ ansible_hostname }}"
-      keystore: "{{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/resources/security/client-truststore.jks"
-      password: wso2carbon
-      src: /etc/pki/tls/certs/{{ ansible_hostname }}.cert
-  when: wso2.external_certificate != false
-
 - name: user-mgt.xml
   template:
     src: "{{ item }}"
@@ -213,6 +128,10 @@
     group: "{{ wso2.user }}"
 
 - debug: msg="{ wso2.dir }}/wso2am-{{ wso2.version }}/repository/deployment/server/senderprofiles.xml"
+  tags:
+    - debug
+    - never
+
 - name: senderprofiles.xml
   template:
     src: senderprofiles.xml.j2
