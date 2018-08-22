@@ -44,6 +44,7 @@
     owner: "{{ wso2.user }}"
     group: "{{ wso2.user }}"
     backup: true
+  notify: restart apigw
 
 - name: copy truststore
   copy:
@@ -52,6 +53,7 @@
     owner: "{{ wso2.user }}"
     group: "{{ wso2.user }}"
     backup: true
+  notify: restart apigw
   
 - name: user-mgt.xml
   template:
