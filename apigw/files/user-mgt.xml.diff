@@ -1,0 +1,11 @@
+--- /tmp/wso2am-2.1.0/repository/conf/user-mgt.xml	2017-02-02 14:50:06.000000000 +0100
++++ user-mgt.xml.j2	2018-02-09 09:55:10.128801129 +0100
+@@ -21,7 +21,7 @@
+             <AdminRole>admin</AdminRole>
+             <AdminUser>
+                 <UserName>admin</UserName>
+-                <Password>admin</Password>
++                <Password>{{ wso2.admin_password }}</Password>
+             </AdminUser>
+             <EveryOneRoleName>everyone</EveryOneRoleName>
+             <!-- By default users in this role sees the registry root -->

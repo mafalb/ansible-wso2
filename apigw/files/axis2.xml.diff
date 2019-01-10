@@ -1,0 +1,77 @@
+--- /tmp/wso2am-2.1.0/repository/conf/axis2/axis2.xml	2017-02-02 14:41:36.000000000 +0100
++++ axis2.xml.j2	2018-03-15 12:23:41.198595151 +0100
+@@ -85,7 +85,7 @@
+     <!-- Resolve root used to resolve synapse references like schemas inside a WSDL -->
+     <parameter name="SynapseConfig.ResolveRoot" locked="false">.</parameter>
+     <!-- Synapse Server name parameter -->
+-    <parameter name="SynapseConfig.ServerName" locked="false">localhost</parameter>
++    <parameter name="SynapseConfig.ServerName" locked="false">{{ ansible_fqdn }}</parameter>
+ 
+     <!-- To override repository/services you need to uncomment following parameter and value -->
+     <!-- SHOULD be absolute file path. -->
+@@ -311,8 +311,8 @@
+             <KeyStore>
+                 <Location>repository/resources/security/wso2carbon.jks</Location>
+                 <Type>JKS</Type>
+-                <Password>wso2carbon</Password>
+-                <KeyPassword>wso2carbon</KeyPassword>
++                <Password>{{ wso2.keystore_password }}</Password>
++                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
+             </KeyStore>
+         </parameter>
+         <parameter name="truststore" locked="false">
+@@ -338,8 +338,8 @@
+             <KeyStore>
+                 <Location>repository/resources/security/wso2carbon.jks</Location>
+                 <Type>JKS</Type>
+-                <Password>wso2carbon</Password>
+-                <KeyPassword>wso2carbon</KeyPassword>
++                <Password>{{ wso2.keystore_password }}</Password>
++                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
+             </KeyStore>
+         </parameter>
+         <parameter name="truststore" locked="false">
+@@ -371,8 +371,8 @@
+             <KeyStore>
+                 <Location>repository/resources/security/wso2carbon.jks</Location>
+                 <Type>JKS</Type>
+-                <Password>wso2carbon</Password>
+-                <KeyPassword>wso2carbon</KeyPassword>
++                <Password>{{ wso2.keystore_password }}</Password>
++                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
+             </KeyStore>
+         </parameter>
+         <parameter name="truststore" locked="false">
+@@ -498,8 +498,8 @@
+             <KeyStore>
+                 <Location>repository/resources/security/wso2carbon.jks</Location>
+                 <Type>JKS</Type>
+-                <Password>wso2carbon</Password>
+-                <KeyPassword>wso2carbon</KeyPassword>
++                <Password>{{ wso2.keystore_password }}</Password>
++                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
+             </KeyStore>
+         </parameter>
+         <parameter name="truststore" locked="false">
+@@ -532,8 +532,8 @@
+             <KeyStore>
+                 <Location>repository/resources/security/wso2carbon.jks</Location>
+                 <Type>JKS</Type>
+-                <Password>wso2carbon</Password>
+-                <KeyPassword>wso2carbon</KeyPassword>
++                <Password>{{ wso2.keystore_password }}</Password>
++                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
+             </KeyStore>
+         </parameter>
+         <parameter name="truststore" locked="false">
+@@ -553,8 +553,8 @@
+             <KeyStore>
+                 <Location>repository/resources/security/wso2carbon.jks</Location>
+                 <Type>JKS</Type>
+-                <Password>wso2carbon</Password>
+-                <KeyPassword>wso2carbon</KeyPassword>
++                <Password>{{ wso2.keystore_password }}</Password>
++                <KeyPassword>{{ wso2.keystore_password }}</KeyPassword>
+             </KeyStore>
+         </parameter>
+         <parameter name="truststore" locked="false">

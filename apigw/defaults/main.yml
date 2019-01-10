@@ -9,3 +9,6 @@ wso2:
   external_certificate: no
   external_keystore: no
   external_ca: no
+
+  enabled: true
+  state: started

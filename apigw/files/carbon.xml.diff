@@ -1,0 +1,17 @@
+--- /tmp/wso2am-2.1.0/repository/conf/carbon.xml	2017-02-02 14:50:12.000000000 +0100
++++ carbon.xml.j2	2018-08-22 11:45:50.470455982 +0200
+@@ -44,12 +44,12 @@
+        This is will become part of the End Point Reference of the
+        services deployed on this server instance.
+     -->
+-    <!--HostName>www.wso2.org</HostName-->
++    <HostName>{{ ansible_fqdn }}</HostName>
+ 
+     <!--
+     Host name to be used for the Carbon management console
+     -->
+-    <!--MgtHostName>mgt.wso2.org</MgtHostName-->
++    <MgtHostName>{{ ansible_fqdn }}</MgtHostName>
+ 
+     <!--
+         The URL of the back end server. This is where the admin services are hosted and

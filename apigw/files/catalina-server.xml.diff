@@ -1,0 +1,12 @@
+41c41
+<                    compression="on"
+---
+>                    compression="{{ wso2.compression }}"
+69c69
+<                    compression="on"
+---
+>                    compression="{{ wso2.compression }}"
+77c77
+<                    keystorePass="wso2carbon"
+---
+>                    keystorePass="{{ wso2.keystore_password }}"
