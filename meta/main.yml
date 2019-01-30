@@ -1,5 +1,4 @@
 ---
 
 dependencies:
-  - role: mafalb.package_repo
-    package_repo_name: wso2
+  - role: mafalb.package_repo/wso2
